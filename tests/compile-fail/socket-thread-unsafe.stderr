@@ -9,12 +9,8 @@ error[E0277]: `*mut c_void` cannot be shared between threads safely
 15 | |     });
    | |_____^ `*mut c_void` cannot be shared between threads safely
    |
-   = help: within `Socket`, the trait `Sync` is not implemented for `*mut c_void`, which is required by `{closure@$DIR/tests/compile-fail/socket-thread-unsafe.rs:13:27: 13:34}: Send`
-note: required because it appears within the type `Socket`
-  --> src/lib.rs
-   |
-   | pub struct Socket {
-   |            ^^^^^^
+   = help: within `Socket`, the trait `Sync` is not implemented for `*mut c_void`
+   = note: required because it appears within the type `Socket`
    = note: required for `&Socket` to implement `Send`
 note: required because it's used within this closure
   --> tests/compile-fail/socket-thread-unsafe.rs:13:27
