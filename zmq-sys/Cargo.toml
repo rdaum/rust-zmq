@@ -14,12 +14,14 @@ build = "build/main.rs"
 links = "zmq"
 
 [features]
+libsodium = ["libsodium-sys-stable"]
 
 [dependencies]
+libsodium-sys-stable = { version = "1.0", optional = true }
 libc = "0.2.15"
 
 [build-dependencies]
-zeromq-src = "0.3"
+zeromq-src = "0.3.2+4.3.5"
 
 [package.metadata.system-deps]
 libzmq = "4.1"
