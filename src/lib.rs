@@ -1293,7 +1293,7 @@ pub fn z85_encode(data: &[u8]) -> result::Result<String, EncodeError> {
         return Err(EncodeError::BadLength);
     }
 
-    let len = data.len() * 5 / 4 + 1;
+    let len = data.len() / 4 * 5 + 1;
     let mut dest = vec![0u8; len];
 
     unsafe {
@@ -1352,7 +1352,7 @@ pub fn z85_decode(data: &str) -> result::Result<Vec<u8>, DecodeError> {
         return Err(DecodeError::BadLength);
     }
 
-    let len = data.len() * 4 / 5;
+    let len = data.len() / 5 * 4;
     let mut dest = vec![0u8; len];
 
     let c_str = ffi::CString::new(data)?;
