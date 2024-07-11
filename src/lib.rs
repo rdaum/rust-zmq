@@ -13,10 +13,10 @@ use std::os::raw::c_void;
 use std::os::unix::io::{AsRawFd, RawFd as UnixRawFd};
 #[cfg(windows)]
 use std::os::windows::io::{AsRawSocket, RawSocket};
+use std::ptr;
 use std::result;
 use std::string::FromUtf8Error;
 use std::sync::Arc;
-use std::{mem, ptr, str};
 
 use zmq_sys::{errno, RawFd};
 
@@ -298,7 +298,7 @@ impl Error {
                 panic!(
                     "unknown error [{}]: {}",
                     x,
-                    str::from_utf8(ffi::CStr::from_ptr(s).to_bytes()).unwrap()
+                    ffi::CStr::from_ptr(s).to_str().unwrap()
                 )
             },
         }
@@ -308,8 +308,7 @@ impl Error {
     pub fn message(self) -> &'static str {
         unsafe {
             let s = zmq_sys::zmq_strerror(self.to_raw());
-            let v: &'static [u8] = mem::transmute(ffi::CStr::from_ptr(s).to_bytes());
-            str::from_utf8(v).unwrap()
+            ffi::CStr::from_ptr(s).to_str().unwrap()
         }
     }
 }
