@@ -19,7 +19,6 @@ links = "zmq"
 libc = "0.2.15"
 
 [build-dependencies]
-system-deps = "6"
 zeromq-src = "0.3"
 
 [package.metadata.system-deps]
