@@ -6,6 +6,7 @@
 
 use log::debug;
 use nix::poll::{self, PollFlags};
+use std::os::fd::BorrowedFd;
 
 use super::with_connection;
 
@@ -56,7 +57,7 @@ fn poll_client(_ctx: &zmq::Context, socket: &zmq::Socket) {
 /// single socket.
 struct PollState<'a> {
     socket: &'a zmq::Socket,
-    fds: [poll::PollFd; 1],
+    fds: [poll::PollFd<'a>; 1],
 }
 
 impl<'a> PollState<'a> {
@@ -64,7 +65,12 @@ impl<'a> PollState<'a> {
         let fd = socket.get_fd().unwrap();
         PollState {
             socket,
-            fds: [poll::PollFd::new(fd, PollFlags::POLLIN)],
+            fds: [poll::PollFd::new(
+                // The returned raw FD is owned by `socket` and remains valid
+                // for the lifetime of this `PollState`.
+                unsafe { BorrowedFd::borrow_raw(fd) },
+                PollFlags::POLLIN,
+            )],
         }
     }
 
@@ -73,10 +79,11 @@ impl<'a> PollState<'a> {
         while !(self.events().intersects(events)) {
             debug!("polling");
             let fds = &mut self.fds;
-            poll::poll(fds, -1).unwrap();
+            poll::poll(fds, poll::PollTimeout::NONE).unwrap();
             debug!("poll done, events: {:?}", fds[0].revents());
             match fds[0].revents() {
                 Some(events) => {
+                    let events: PollFlags = events;
                     if !events.contains(PollFlags::POLLIN) {
                         continue;
                     }
