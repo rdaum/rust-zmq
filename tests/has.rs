@@ -4,3 +4,8 @@ fn test_has() {
     // wether the capability is actually supported or not.
     assert!(zmq::has("ipc").is_some());
 }
+
+#[test]
+fn test_has_rejects_interior_nul() {
+    assert_eq!(zmq::has("\0:"), None);
+}

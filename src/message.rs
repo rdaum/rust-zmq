@@ -47,6 +47,14 @@ unsafe extern "C" fn drop_msg_data_box(data: *mut c_void, hint: *mut c_void) {
 }
 
 impl Message {
+    #[inline]
+    fn checked_msg_len(len: usize) -> size_t {
+        // Passing absurdly large sizes straight into libzmq can trigger hard
+        // allocator aborts in sanitizer builds; fail fast in Rust instead.
+        assert!(len <= isize::MAX as usize, "message size too large: {}", len);
+        len as size_t
+    }
+
     unsafe fn alloc<F>(f: F) -> Message
     where
         F: FnOnce(&mut zmq_sys::zmq_msg_t) -> i32,
@@ -92,11 +100,13 @@ impl Message {
         note = "This method has an unintuitive name, and should not be needed."
     )]
     pub unsafe fn with_capacity_unallocated(len: usize) -> Message {
-        Self::alloc(|msg| zmq_sys::zmq_msg_init_size(msg, len as size_t))
+        let len = Self::checked_msg_len(len);
+        Self::alloc(|msg| zmq_sys::zmq_msg_init_size(msg, len))
     }
 
     unsafe fn with_size_uninit(len: usize) -> Message {
-        Self::alloc(|msg| zmq_sys::zmq_msg_init_size(msg, len as size_t))
+        let len = Self::checked_msg_len(len);
+        Self::alloc(|msg| zmq_sys::zmq_msg_init_size(msg, len))
     }
 
     /// Create a `Message` with space for `len` bytes that are initialized to 0.
@@ -182,7 +192,7 @@ impl Message {
     /// This is considered a bug in the bindings, and will be fixed with the
     /// next API-breaking release.
     pub fn gets<'a>(&'a mut self, property: &str) -> Option<&'a str> {
-        let c_str = ffi::CString::new(property.as_bytes()).unwrap();
+        let c_str = ffi::CString::new(property.as_bytes()).ok()?;
 
         let value = unsafe { zmq_sys::zmq_msg_gets(&self.msg, c_str.as_ptr()) };
 

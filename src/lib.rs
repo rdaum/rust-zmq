@@ -1217,11 +1217,12 @@ pub fn proxy_steerable_with_capture(
 
 /// Return true if the used 0MQ library has the given capability.
 ///
-/// The return value is always the `Some` variant; it used to return
-/// `None` for older, now unsupported versions of 0MQ that didn't have
-/// the wrapped `zmq_has` function. Thus, for code that requires `zmq`
-/// version 0.9.0 or newer, you can safely call `unwrap` on the return
-/// value.
+/// For capability names without interior NUL bytes, the return value is
+/// always the `Some` variant; it used to return `None` for older, now
+/// unsupported versions of 0MQ that didn't have the wrapped `zmq_has`
+/// function. Thus, for code that requires `zmq` version 0.9.0 or newer,
+/// you can safely call `unwrap` on the return value for valid capability
+/// names.
 ///
 /// For a list of capabilities, please consult the `zmq_has` manual
 /// page.
@@ -1231,7 +1232,7 @@ pub fn proxy_steerable_with_capture(
 /// In the `zmq` 0.10.0, this function will simply return `bool`.
 ///
 pub fn has(capability: &str) -> Option<bool> {
-    let c_str = ffi::CString::new(capability).unwrap();
+    let c_str = ffi::CString::new(capability).ok()?;
     unsafe { Some(zmq_sys::zmq_has(c_str.as_ptr()) == 1) }
 }
 

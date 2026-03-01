@@ -33,3 +33,24 @@ quickcheck! {
         Message::from(input) == original
     }
 }
+
+#[test]
+fn message_gets_rejects_interior_nul_property() {
+    let mut msg = Message::new();
+    assert_eq!(msg.gets("\0bad"), None);
+}
+
+#[test]
+#[should_panic(expected = "message size too large")]
+fn message_with_size_rejects_pathological_allocation_size() {
+    let _ = Message::with_size(usize::MAX);
+}
+
+#[allow(deprecated)]
+#[test]
+#[should_panic(expected = "message size too large")]
+fn message_with_capacity_unallocated_rejects_pathological_allocation_size() {
+    unsafe {
+        let _ = Message::with_capacity_unallocated(usize::MAX);
+    }
+}
