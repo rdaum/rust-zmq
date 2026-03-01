@@ -7,6 +7,12 @@ pub fn configure() {
     println!("cargo:rerun-if-changed=build/main.rs");
     println!("cargo:rerun-if-env-changed=PROFILE");
 
+    // libzmq's Windows code path references security descriptor APIs.
+    // Ensure final linkage includes the import library that provides them.
+    if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("windows") {
+        println!("cargo:rustc-link-lib=advapi32");
+    }
+
     // get sodium lib and include paths from environment
     let sodium_paths = env::var("DEP_SODIUM_LIB")
         .and_then(|lib| env::var("DEP_SODIUM_INCLUDE").map(|inc| LibLocation::new(lib, inc)))
