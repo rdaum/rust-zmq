@@ -10,7 +10,7 @@ Rust ZeroMQ bindings.
 
 [Documentation](https://docs.rs/crate/zmq/)
 
-[Release Notes](https://github.com/erickt/rust-zmq/tree/master/NEWS.md)
+[Release Notes](./NEWS.md)
 
 # About
 
@@ -18,6 +18,39 @@ The `zmq` crate provides bindings for the `libzmq` library from the
 [ZeroMQ](https://zeromq.org/) project. The API exposed by `zmq` should
 be safe (in the usual Rust sense), but it follows the C API closely,
 so it is not very idiomatic.
+
+# Fork Status
+
+This repository is a maintained fork of
+[erickt/rust-zmq](https://github.com/erickt/rust-zmq).
+
+Why this fork exists:
+
+- Upstream appears to have limited maintenance activity.
+- There was significant backlog in open pull requests and issues.
+- Downstream users needed fixes that were not available in a published release.
+
+What has been integrated in this fork:
+
+- Curve/libsodium support fixes and build integration.
+- `zmq-sys` dependency updates and zeromq-src baseline updates.
+- Selected non-breaking API improvements: `ZMQ_INVERT_MATCHING`,
+  `ZMQ_TCP_MAXRT`, `set_xpub_verboser`, and `AsFd`/`AsSocket` support.
+- 32-bit build compatibility and test/toolchain upkeep (bitflags 2.x, trybuild snapshots).
+- Safety/correctness hardening: reject interior-NUL property names in `has`
+  and `Message::gets`; guard pathological `Message` allocation sizes.
+- Added fuzzing harness + scheduled ASAN smoke workflow.
+
+This fork currently keeps crate package names unchanged (`zmq`, `zmq-sys`) to
+minimize downstream migration cost.
+
+If you need to force this fork in a workspace:
+
+```toml
+[patch.crates-io]
+zmq = { git = "https://github.com/rdaum/rust-zmq.git", branch = "main" }
+zmq-sys = { git = "https://github.com/rdaum/rust-zmq.git", branch = "main" }
+```
 
 # Compatibility
 
