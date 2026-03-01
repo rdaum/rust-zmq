@@ -43,6 +43,19 @@ fn main() {
 You can find more usage examples in
 https://github.com/erickt/rust-zmq/tree/master/examples.
 
+# Notes
+
+## Process environment safety
+
+`libzmq` may read process environment variables internally. Avoid mutating the
+process environment (for example via `std::env::set_var`/`remove_var`) after
+creating `zmq::Context` values or while other threads may be using `zmq`.
+
+## Shutdown and linger
+
+Sockets default to `ZMQ_LINGER = -1` (infinite), so dropping a socket can block
+while pending outbound messages flush. For fast shutdown, set `socket.set_linger(0)`.
+
 # Contributing
 
 Unless you explicitly state otherwise, any contribution intentionally

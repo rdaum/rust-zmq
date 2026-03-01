@@ -312,6 +312,23 @@ test!(test_getset_linger, {
     assert_eq!(sock.get_linger().unwrap(), 100);
 });
 
+test!(test_zero_linger_drop_nohang_with_unconnected_peer, {
+    let ctx = Context::new();
+    let push = ctx.socket(PUSH).unwrap();
+    push.set_linger(0).unwrap();
+    push.connect("tcp://127.0.0.1:65535").unwrap();
+
+    let send_result = push.send(&[][..], DONTWAIT);
+    assert!(
+        send_result.is_ok() || send_result == Err(Error::EAGAIN),
+        "unexpected send result: {:?}",
+        send_result
+    );
+
+    drop(push);
+    drop(ctx);
+});
+
 test!(test_getset_reconnect_ivl, {
     let ctx = Context::new();
     let sock = ctx.socket(REQ).unwrap();

@@ -1,4 +1,15 @@
 //! Module: zmq
+//!
+//! # Environment safety
+//!
+//! `libzmq` reads process environment variables internally (for example via
+//! `getenv`). On platforms where concurrent environment reads and writes are not
+//! thread-safe, mutating the process environment while `zmq` is active can
+//! cause undefined behavior.
+//!
+//! Configure environment variables before creating `zmq::Context` values or
+//! spawning threads that might touch `libzmq`, and avoid mutating the process
+//! environment afterwards.
 
 #![allow(trivial_numeric_casts)]
 
@@ -494,6 +505,10 @@ impl Default for Context {
 }
 
 /// A socket, the central object in 0MQ.
+///
+/// By default (`ZMQ_LINGER = -1`), dropping a socket may block while pending
+/// outbound messages are flushed. Use `set_linger(0)` when you need fast
+/// shutdown and can tolerate dropping unsent messages.
 pub struct Socket {
     sock: *mut c_void,
     // The `context` field is never accessed, but implicitly does
@@ -841,6 +856,12 @@ impl Socket {
         (get_sndbuf, set_sndbuf) => ZMQ_SNDBUF as i32,
         (get_rcvbuf, set_rcvbuf) => ZMQ_RCVBUF as i32,
         (get_tos, set_tos) => ZMQ_TOS as i32,
+        /// Accessor for the `ZMQ_LINGER` option (milliseconds).
+        ///
+        /// The default is `-1` (infinite), which means dropping a socket or
+        /// terminating its context may block until queued outbound messages
+        /// are delivered. Set to `0` for fast shutdown when message loss is
+        /// acceptable.
         (get_linger, set_linger) => ZMQ_LINGER as i32,
         (get_reconnect_ivl, set_reconnect_ivl) => ZMQ_RECONNECT_IVL as i32,
         (get_reconnect_ivl_max, set_reconnect_ivl_max) => ZMQ_RECONNECT_IVL_MAX as i32,
