@@ -1,3 +1,64 @@
+# Unreleased (Fork: rdaum/rust-zmq, as of 2026-03-01)
+
+This changelog entry documents the fork maintenance line on top of `v0.10.0`.
+
+## Fork policy
+
+- This fork exists to provide active maintenance and timely integration of
+  important fixes while upstream maintenance appears limited.
+- Crate package names are intentionally unchanged (`zmq`, `zmq-sys`) to reduce
+  downstream migration cost.
+- Commit attribution from imported work is preserved via cherry-pick and commit
+  metadata.
+
+## Integrated PR work (post-`v0.10.0`)
+
+- Curve/libsodium support restoration and vendored build integration
+  (derived from upstream PR work including `#400` and `#394`-related changes).
+- `zmq-sys` dependency and metadata updates (`#422`, `#428`).
+- Context max socket accessors (`#421`).
+- Correct `ZMQ_RCVMORE` decoding as `c_int` (`#393`).
+- 32-bit compatibility adjustments (`#329`).
+- Socket ownership cleanup for `into_raw`/`from_raw` internals (`#314`).
+- Added `ZMQ_INVERT_MATCHING` socket option (`#406`).
+- Added `ZMQ_TCP_MAXRT` socket option (upstream merged `#418`).
+- Added `set_xpub_verboser` socket option accessor (`#380`).
+- Added `AsFd`/`AsSocket` support (`#361`).
+- Updated `env_logger` to `0.10` (`#355`).
+- Updated `nix` to `0.26` (`#358`).
+- Updated `bitflags` to `2.x` (`#377`).
+- Refreshed compile-fail snapshots for current toolchains (`#379`).
+
+## Safety and correctness fixes
+
+- Hardened string-property handling to avoid panics on interior-NUL input:
+  `zmq::has` and `Message::gets` now reject such names gracefully.
+  Addresses issues `#409` and `#427`.
+- Guarded pathological `Message` allocation sizes before FFI calls to avoid
+  allocation-size overflow behavior under fuzzing.
+  Addresses issues `#424` and `#426`.
+- Added docs and tests clarifying shutdown behavior with default
+  `ZMQ_LINGER = -1`, including an explicit non-hanging `linger=0` test path.
+  Tracks issue `#382`.
+- Added explicit crate-level documentation warning about process-environment
+  mutation hazards while `libzmq` may concurrently read environment variables.
+  Tracks issue `#332`.
+
+## Tooling, CI, and hardening infrastructure
+
+- Added `cargo-fuzz` harness for `has` capability parsing.
+- Added `cargo-fuzz` harness for `Message::gets` property handling.
+- Added `cargo-fuzz` harness for message allocation paths.
+- Added scheduled GitHub Actions ASAN fuzz smoke workflow.
+- Added pre-release fuzz checklist to contribution docs.
+
+## Upstream-post-`v0.10.0` fixes retained in this fork
+
+- `Message` trait improvements (`AsRef<[u8]>`, `AsMut<[u8]>`).
+- Z85 fixes (memory leak fix and arithmetic overflow guard).
+- API cleanup (`DONTWAIT`/`SNDMORE` as `const`).
+- CI modernization and compile-fail maintenance for newer Rust toolchains.
+
 # 0.9.2
 
 ## New and improved functionality
