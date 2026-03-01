@@ -12,3 +12,4 @@ Cargo.lock
 /fuzz/coverage/
 /fuzz/corpus/
 /fuzz/target/
+.idea/
