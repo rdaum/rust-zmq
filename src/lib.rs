@@ -1046,6 +1046,7 @@ impl Socket {
 // is unfortunate.
 bitflags! {
     /// Type representing pending socket events.
+    #[derive(Debug, PartialEq, Clone, Copy)]
     pub struct PollEvents: i16 {
         /// For `poll()`, specifies to signal when a message/some data
         /// can be read from a socket.
