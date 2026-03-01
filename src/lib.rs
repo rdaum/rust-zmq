@@ -8,6 +8,7 @@ use libc::{c_int, c_long, c_short};
 use std::ffi;
 use std::fmt;
 use std::marker::PhantomData;
+use std::mem;
 use std::os::raw::c_void;
 #[cfg(unix)]
 use std::os::unix::io::{AsRawFd, RawFd as UnixRawFd};
