@@ -8,3 +8,7 @@
 /target/
 Cargo.lock
 /msrv-test/target/
+/fuzz/artifacts/
+/fuzz/coverage/
+/fuzz/corpus/
+/fuzz/target/

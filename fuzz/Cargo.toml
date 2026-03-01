@@ -1,0 +1,38 @@
+[package]
+name = "zmq-fuzz"
+version = "0.0.0"
+publish = false
+edition = "2021"
+
+[package.metadata]
+cargo-fuzz = true
+
+[dependencies]
+libfuzzer-sys = "0.4"
+
+[dependencies.zmq]
+path = ".."
+
+[workspace]
+members = ["."]
+
+[[bin]]
+name = "fuzz_has"
+path = "fuzz_targets/fuzz_has.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_message_gets"
+path = "fuzz_targets/fuzz_message_gets.rs"
+test = false
+doc = false
+bench = false
+
+[[bin]]
+name = "fuzz_message_alloc"
+path = "fuzz_targets/fuzz_message_alloc.rs"
+test = false
+doc = false
+bench = false
