@@ -62,3 +62,23 @@ If you add a feature, or fix an issue, think about how it could be
 tested, and add to the testsuite, if possible. This will make it
 easier for reviewers to see that your code actually does what it is
 supposed to do, and will prevent future regressions.
+
+### Pre-release fuzz check
+
+For changes touching message parsing/allocation, string handling, or
+other safety-sensitive paths, run a short fuzz smoke check before
+publishing a release.
+
+Install cargo-fuzz (nightly required):
+
+```bash
+cargo +nightly install cargo-fuzz
+```
+
+Run from the `fuzz/` directory:
+
+```bash
+cargo +nightly fuzz run fuzz_has --sanitizer address -- -max_total_time=60
+cargo +nightly fuzz run fuzz_message_gets --sanitizer address -- -max_total_time=60
+cargo +nightly fuzz run fuzz_message_alloc --sanitizer address -- -max_total_time=60
+```
