@@ -467,9 +467,7 @@ impl Context {
 
     /// Set the maximum number of sockets allowed on the context.
     pub fn set_max_sockets(&self, value: i32) -> Result<()> {
-        zmq_try!(unsafe {
-            zmq_sys::zmq_ctx_set(self.raw.ctx, zmq_sys::ZMQ_MAX_SOCKETS as _, value as i32)
-        });
+        zmq_try!(unsafe { zmq_sys::zmq_ctx_set(self.raw.ctx, zmq_sys::ZMQ_MAX_SOCKETS as _, value) });
         Ok(())
     }
 
@@ -536,7 +534,7 @@ impl AsRawFd for Socket {
 
 #[cfg(unix)]
 impl AsFd for Socket {
-    fn as_fd(&self) -> BorrowedFd {
+    fn as_fd(&self) -> BorrowedFd<'_> {
         unsafe { BorrowedFd::borrow_raw(self.as_raw_fd()) }
     }
 }
@@ -550,7 +548,7 @@ impl AsRawSocket for Socket {
 
 #[cfg(windows)]
 impl AsSocket for Socket {
-    fn as_socket(&self) -> BorrowedSocket {
+    fn as_socket(&self) -> BorrowedSocket<'_> {
         unsafe { BorrowedSocket::borrow_raw(self.as_raw_socket()) }
     }
 }
@@ -1044,7 +1042,7 @@ impl Socket {
     }
 
     /// Create a `PollItem` from the socket.
-    pub fn as_poll_item(&self, events: PollEvents) -> PollItem {
+    pub fn as_poll_item(&self, events: PollEvents) -> PollItem<'_> {
         PollItem {
             socket: self.sock,
             fd: 0,
@@ -1341,7 +1339,7 @@ impl std::error::Error for EncodeError {
 ///
 /// The input slice *must* have a length divisible by 4.
 pub fn z85_encode(data: &[u8]) -> result::Result<String, EncodeError> {
-    if data.len() % 4 != 0 {
+    if !data.len().is_multiple_of(4) {
         return Err(EncodeError::BadLength);
     }
 
@@ -1400,7 +1398,7 @@ impl std::error::Error for DecodeError {
 /// Note that 0MQ silently accepts characters outside the range defined for
 /// the Z85 encoding.
 pub fn z85_decode(data: &str) -> result::Result<Vec<u8>, DecodeError> {
-    if data.len() % 5 != 0 {
+    if !data.len().is_multiple_of(5) {
         return Err(DecodeError::BadLength);
     }
 
